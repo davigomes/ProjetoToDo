@@ -1,0 +1,58 @@
+version: '3'
+
+services:
+  todofrontend:
+    depends_on:
+      - todobackend
+    container_name: todofrontend
+    build: TodoFrontend/.
+    ports:
+      - "4200:80"
+    restart: always
+
+  todobackend:
+    depends_on:
+      - db
+    container_name: todobackend
+    build:
+      context: TodoBackend
+      dockerfile: Api/Dockerfile
+    ports:
+      - "8080:80"
+      - "8081:443"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=password
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/mnt/c/https/Api.pfx
+    volumes:
+      - ${USERPROFILE}\.aspnet\https:/mnt/c/https:ro  
+
+  mq:
+    depends_on:
+      - db
+    image: rabbitmq:3.11.7-management
+    container_name: Queue
+    hostname: todoapp-queue
+    ports:
+      - "9000:15672"
+      - "5672:5672"
+      - "25676:25676"
+    volumes:
+      - ./.containers/queue/data/:/var/lib/rabbitmq
+      - ./.containers/queue/log/:/var/log/rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+
+  db:
+    image: mysql:8.0.27
+    environment:
+      MYSQL_USER: davi
+      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: password
+    ports:
+      - "33061:3306"
+    restart: always
+
+  

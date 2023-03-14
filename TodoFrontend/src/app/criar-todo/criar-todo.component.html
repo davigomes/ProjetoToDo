@@ -1,0 +1,10 @@
+<form class="form" (ngSubmit)="onSubmit()">
+  <div class="example-button-row">
+    <mat-form-field appearance="fill">
+      <mat-label>Descrição</mat-label>
+      <input matInput name="descricao" [(ngModel)]="descricao">
+    </mat-form-field>
+    <button class="button-todo" mat-raised-button value="Submit">Criar</button>
+  </div>
+</form>
+ 
