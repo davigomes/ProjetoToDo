@@ -12,7 +12,8 @@ services:
 
   todobackend:
     depends_on:
-      - db
+      mq:
+        condition: service_healthy
     container_name: todobackend
     build:
       context: TodoBackend
@@ -26,11 +27,12 @@ services:
       - ASPNETCORE_Kestrel__Certificates__Default__Password=password
       - ASPNETCORE_Kestrel__Certificates__Default__Path=/mnt/c/https/Api.pfx
     volumes:
-      - ${USERPROFILE}\.aspnet\https:/mnt/c/https:ro  
+      - ${USERPROFILE}\.aspnet\https:/mnt/c/https:ro
 
   mq:
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     image: rabbitmq:3.11.7-management
     container_name: Queue
     hostname: todoapp-queue
@@ -38,6 +40,17 @@ services:
       - "9000:15672"
       - "5672:5672"
       - "25676:25676"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "rabbitmq-diagnostics",
+          "check_port_connectivity"
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
     volumes:
       - ./.containers/queue/data/:/var/lib/rabbitmq
       - ./.containers/queue/log/:/var/log/rabbitmq
@@ -53,6 +66,18 @@ services:
       MYSQL_ROOT_PASSWORD: password
     ports:
       - "33061:3306"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-ppassword"
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
     restart: always
-
-  
