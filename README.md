@@ -1,6 +1,6 @@
 # Como rodar o projeto
 
-Na pasta TodoApp, executar docker-compose up --build
+Na pasta ProjetoToDo, executar docker-compose up --build
 
 Frontend: http://localhost:4200
 
